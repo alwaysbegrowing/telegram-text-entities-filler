@@ -46,6 +46,8 @@ const escapeMarkdownTextByEntity = (text, entity) => {
     return escapeLinkChars(text);
   } else if (entity.type === 'text_mention') {
     return escapeLinkChars(text);
+  } else if (entity.type === 'url') {
+    return escapeCommonChars(text);
   } else {
     return text;
   }
@@ -80,8 +82,8 @@ const wrapTextWithMarkdownEntity = (text, entity) => {
       return text;
     }
 
-    const breakLinePosition = text.indexOf('\n');
-    if (breakLinePosition > -1) {
+    const breakLinePosition = text.lastIndexOf('\n');
+    if (breakLinePosition > -1 && text.endsWith('\n')) {
       text = insertTextAtPosition(text, breakLinePosition, closeTag);
       return `${openTag}${text}`;
     } else {
@@ -95,6 +97,8 @@ const fillMarkdownEntitiesMarkup = (text, entities) => {
   const topLevelEntities = _.reverse(
     Object.values(entitiesChunks).map(entitiesList => entitiesList[0])
   );
+
+  const wrappedEscapedEntitiesArr = [];
 
   for (const entity of topLevelEntities) {
     let offset = 0;
@@ -149,6 +153,7 @@ const fillMarkdownEntitiesMarkup = (text, entities) => {
       }
 
       accumOffset += wrappedNestedEntityText.length - entityText.length;
+      wrappedEscapedEntitiesArr.push([wrappedNestedEntityText, entity])
 
       text = rewriteTextAtPosition(
         text,
@@ -166,8 +171,50 @@ const fillMarkdownEntitiesMarkup = (text, entities) => {
     for (const nestedEntity of nestedEntities) {
       modifiedText = processEntity(modifiedText, nestedEntity);
     }
-
     text = processEntity(modifiedText, entity);
+  }
+
+  return escapeNotInEntities(text, wrappedEscapedEntitiesArr);
+};
+
+const escapeNotInEntities = (text, wrappedArr) => {
+  const escapeStr = (string) => {
+    return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  };
+
+  let escapedOffsets = [];
+
+  for (const str of wrappedArr) {
+    const regex = text.match(escapeStr(str[0]));
+    if (regex) {
+      const offset = {
+        start: regex.index,
+        end: regex.index + str[0].length,
+        string: text.substr(regex.index, str[0].length)
+      };
+      escapedOffsets.push(offset);
+    }
+  }
+  
+  let textToSplit = text;
+
+  escapedOffsets = escapedOffsets.filter(n => 
+    !escapedOffsets.find(m => 
+      (m.string !== n.string) && (n.start >= m.start && n.end <= m.end)
+    )
+  );
+  
+  for (const offset of escapedOffsets) {
+    textToSplit = textToSplit.replace(offset.string, "[splitKeyword]");
+  }
+  
+  const subsToEscape = textToSplit.split("[splitKeyword]");
+  
+  for (const str of subsToEscape) {
+    if (!str) continue;
+    const escapedStr = escapeCommonChars(str);
+    if (escapedStr !== str)
+      text = text.replace(str, escapedStr);
   }
 
   return text;
