@@ -44,9 +44,21 @@ const escapeMarkdownTextByEntity = (text, entity) => {
     return escapeCodeChars(text);
   } else if (entity.type === 'text_link') {
     return escapeLinkChars(text);
+  } else if (entity.type === 'mention') {
+    return escapeCommonChars(text);
   } else if (entity.type === 'text_mention') {
     return escapeLinkChars(text);
   } else if (entity.type === 'url') {
+    return escapeCommonChars(text);
+  } else if (entity.type === 'hashtag') {
+    return escapeCommonChars(text);
+  } else if (entity.type === 'bot_command') {
+    return escapeCommonChars(text);
+  } else if (entity.type === 'cashtag') {
+    return escapeCommonChars(text);
+  } else if (entity.type === 'email') {
+    return escapeCommonChars(text);
+  } else if (entity.type === 'phone_number') {
     return escapeCommonChars(text);
   } else {
     return text;
