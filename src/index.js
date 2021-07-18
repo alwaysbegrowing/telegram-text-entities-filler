@@ -84,8 +84,7 @@ const wrapTextWithMarkdownEntity = (text, entity) => {
       openTag = '<ins>';
       closeTag = '</ins>';
     } else if (entity.type === 'strikethrough') {
-      openTag = '<s>';
-      closeTag = '</s>';
+      openTag = closeTag = '~';
     } else if (entity.type === 'code') {
       openTag = closeTag = '```';
     } else if (entity.type === 'text_link') {
