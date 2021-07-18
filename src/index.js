@@ -81,8 +81,7 @@ const wrapTextWithMarkdownEntity = (text, entity) => {
     } else if (entity.type === 'italic') {
       openTag = closeTag = '*';
     } else if (entity.type === 'underline') {
-      openTag = '<ins>';
-      closeTag = '</ins>';
+      openTag = closeTag = '\_';
     } else if (entity.type === 'strikethrough') {
       openTag = closeTag = '~';
     } else if (entity.type === 'code') {
