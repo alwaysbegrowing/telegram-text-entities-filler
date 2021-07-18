@@ -48,6 +48,8 @@ const escapeMarkdownTextByEntity = (text, entity) => {
     return escapeCommonChars(text);
   } else if (entity.type === 'text_mention') {
     return escapeLinkChars(text);
+  } else if (entity.type === 'mention') {
+    return escapeLinkChars(text);
   } else if (entity.type === 'url') {
     return escapeCommonChars(text);
   } else if (entity.type === 'hashtag') {
@@ -79,17 +81,15 @@ const wrapTextWithMarkdownEntity = (text, entity) => {
     } else if (entity.type === 'italic') {
       openTag = closeTag = '*';
     } else if (entity.type === 'underline') {
-      openTag = '<u>';
-      closeTag = '</u>';
+      openTag = closeTag = '__';
     } else if (entity.type === 'strikethrough') {
-      openTag = '<s>';
-      closeTag = '</s>';
+      openTag = closeTag = '~'
     } else if (entity.type === 'code') {
       openTag = closeTag = '```';
     } else if (entity.type === 'text_link') {
       openTag = '[';
       closeTag = `](${entity.url})`;
-    } else if (entity.type === 'text_mention') {
+    } else if (entity.type === 'text_mention' || entity.type === 'mention') {
       openTag = '[';
       closeTag = `](https://t.me/${text.slice(1)})`;
     } else {
